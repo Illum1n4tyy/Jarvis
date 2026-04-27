@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JARVIS</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- config.js va aquí: si existe, carga la key automáticamente. Si no existe, no pasa nada. -->
+<script src="config.js" onerror="console.log('[JARVIS] config.js no encontrado, usa CONFIG manual.')"></script>
+
 <style>
   :root {
     --cyan: #00d4ff;
@@ -36,7 +40,6 @@
     position: relative;
   }
 
-  /* Grid background */
   body::before {
     content: '';
     position: fixed;
@@ -49,7 +52,6 @@
     z-index: 0;
   }
 
-  /* Vignette */
   body::after {
     content: '';
     position: fixed;
@@ -59,7 +61,6 @@
     z-index: 0;
   }
 
-  /* Scanlines */
   .scanlines {
     position: fixed;
     inset: 0;
@@ -74,7 +75,6 @@
     z-index: 100;
   }
 
-  /* ===== HEADER ===== */
   header {
     position: relative;
     z-index: 10;
@@ -143,7 +143,6 @@
     50% { opacity: 0.3; }
   }
 
-  /* ===== MAIN LAYOUT ===== */
   .main {
     position: relative;
     z-index: 10;
@@ -152,7 +151,6 @@
     overflow: hidden;
   }
 
-  /* ===== LEFT PANEL ===== */
   .panel-left {
     width: 240px;
     border-right: 1px solid var(--border);
@@ -222,7 +220,33 @@
     letter-spacing: 1px;
   }
 
-  /* ===== CENTER ===== */
+  /* key-status badge en panel izquierdo */
+  .key-status-wrap {
+    margin-top: auto;
+  }
+
+  .key-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 6px 10px;
+    border-radius: 2px;
+    text-align: center;
+    border: 1px solid;
+  }
+
+  .key-status.loaded {
+    color: var(--green);
+    border-color: #00ff8844;
+    background: #00ff8811;
+  }
+
+  .key-status.manual {
+    color: var(--amber);
+    border-color: var(--amber-dim);
+    background: #ffb30011;
+  }
+
   .center {
     flex: 1;
     display: flex;
@@ -232,7 +256,6 @@
     overflow: hidden;
   }
 
-  /* ===== ORB ===== */
   .orb-container {
     position: relative;
     width: 220px;
@@ -341,7 +364,6 @@
     opacity: 0.7;
   }
 
-  /* Orb listening state */
   .orb.listening {
     border-color: var(--amber-dim);
     box-shadow: 0 0 30px var(--amber-dim), inset 0 0 30px #ffb30011;
@@ -369,7 +391,6 @@
     50% { opacity: 1; transform: scale(1.1); }
   }
 
-  /* Wave bars */
   .wave-bars {
     display: flex;
     align-items: center;
@@ -422,7 +443,6 @@
     50% { transform: scaleY(1); }
   }
 
-  /* ===== CHAT ===== */
   .chat-area {
     flex: 1;
     width: 100%;
@@ -517,7 +537,6 @@
     50% { opacity: 1; transform: scale(1.2); }
   }
 
-  /* ===== INPUT ===== */
   .input-area {
     width: 100%;
     max-width: 600px;
@@ -604,7 +623,6 @@
     50% { box-shadow: 0 0 20px var(--amber-dim), 0 0 40px #ffb30018; }
   }
 
-  /* ===== RIGHT PANEL ===== */
   .panel-right {
     width: 200px;
     border-left: 1px solid var(--border);
@@ -678,7 +696,6 @@
     color: var(--amber);
   }
 
-  /* ===== CONFIG MODAL ===== */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -768,7 +785,6 @@
     box-shadow: 0 0 15px var(--cyan-dim);
   }
 
-  /* ===== TOASTS ===== */
   #toast-container {
     position: fixed;
     bottom: 80px;
@@ -801,7 +817,6 @@
     to { opacity: 0; transform: translateX(20px); }
   }
 
-  /* ===== CORNER DECORATIONS ===== */
   .corner {
     position: fixed;
     width: 20px;
@@ -814,7 +829,6 @@
   .corner.bl { bottom: 8px; left: 8px; border-bottom: 1px solid var(--cyan-dim); border-left: 1px solid var(--cyan-dim); }
   .corner.br { bottom: 8px; right: 8px; border-bottom: 1px solid var(--cyan-dim); border-right: 1px solid var(--cyan-dim); }
 
-  /* misc */
   .wave-wrap {
     display: flex;
     flex-direction: column;
@@ -842,10 +856,9 @@
 <div class="corner bl"></div>
 <div class="corner br"></div>
 
-<!-- HEADER -->
 <header>
   <div>
-    <div class="logo">JARVIS<span>SISTEMA PERSONAL · v2.0</span></div>
+    <div class="logo">JARVIS<span>SISTEMA PERSONAL · v2.1</span></div>
   </div>
   <div class="header-right">
     <div class="status-bar">
@@ -866,10 +879,8 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <div class="main">
 
-  <!-- LEFT PANEL -->
   <div class="panel-left">
     <div>
       <div class="panel-label">// MEMORIA</div>
@@ -889,11 +900,15 @@
         <div class="skill-tag">TTS</div>
       </div>
     </div>
+
+    <!-- Badge que muestra si la key vino de config.js o manual -->
+    <div class="key-status-wrap">
+      <div class="panel-label">// API KEY</div>
+      <div class="key-status" id="key-source-badge">VERIFICANDO...</div>
+    </div>
   </div>
 
-  <!-- CENTER -->
   <div class="center">
-    <!-- ORB -->
     <div class="orb-container">
       <div class="orb-glow"></div>
       <div class="orb-ring"></div>
@@ -922,10 +937,8 @@
       <div class="orb-label" id="orb-label">CLICK PARA HABLAR</div>
     </div>
 
-    <!-- CHAT -->
     <div class="chat-area" id="chat"></div>
 
-    <!-- INPUT -->
     <div class="input-area">
       <div class="input-wrap">
         <span class="input-prefix">›</span>
@@ -937,7 +950,6 @@
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
   <div class="panel-right">
     <div>
       <div class="panel-label">// COMANDOS</div>
@@ -977,7 +989,6 @@
 
 </div>
 
-<!-- CONFIG MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h2>// CONFIGURACIÓN</h2>
@@ -1003,12 +1014,18 @@
 <script>
 // ===========================
 // CONFIG
+// Prioridad: localStorage > config.js > vacío
 // ===========================
 let config = {
-  groqKey: localStorage.getItem('jarvis_key') || '',
+  groqKey: localStorage.getItem('jarvis_key') || (typeof window.JARVIS_KEY !== 'undefined' ? window.JARVIS_KEY : ''),
   model: localStorage.getItem('jarvis_model') || 'llama-3.3-70b-versatile',
   userName: localStorage.getItem('jarvis_name') || 'Axel'
 };
+
+// Detectar de dónde vino la key para mostrar en el badge
+const KEY_SOURCE = localStorage.getItem('jarvis_key')
+  ? 'localStorage'
+  : (typeof window.JARVIS_KEY !== 'undefined' ? 'config.js' : 'none');
 
 const SYSTEM_PROMPT = () => `Eres Jarvis, asistente personal creado por ${config.userName}. Hablas español latino casual y natural.
 
@@ -1030,7 +1047,6 @@ COMO HABLAR:
 let isListening = false;
 let isSpeaking = false;
 let recognition = null;
-let currentUtterance = null;
 
 // ===========================
 // CLOCK
@@ -1044,6 +1060,23 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// ===========================
+// KEY SOURCE BADGE
+// ===========================
+function updateKeyBadge() {
+  const badge = document.getElementById('key-source-badge');
+  if (!config.groqKey) {
+    badge.textContent = '✗ SIN KEY';
+    badge.className = 'key-status manual';
+  } else if (KEY_SOURCE === 'config.js') {
+    badge.textContent = '✓ AUTO (config.js)';
+    badge.className = 'key-status loaded';
+  } else {
+    badge.textContent = '✓ MANUAL (CONFIG)';
+    badge.className = 'key-status loaded';
+  }
+}
 
 // ===========================
 // ORB STATE
@@ -1124,8 +1157,7 @@ function hideTyping() {
 // ===========================
 async function askGroq(text) {
   if (!config.groqKey) {
-    const r = 'Oye, necesitas configurar tu API key de Groq primero. Toca el botón CONFIG arriba.';
-    return r;
+    return 'No tengo API key cargada. Crea un config.js con tu key o ponla en ⚙ CONFIG.';
   }
 
   try {
@@ -1159,7 +1191,7 @@ async function askGroq(text) {
     return data.choices[0].message.content;
   } catch (e) {
     console.error(e);
-    return 'Sin conexión o error de red. Revisa la consola.';
+    return 'Sin conexión o error de red.';
   }
 }
 
@@ -1220,7 +1252,6 @@ function handleLocal(text) {
     if (q) { setTimeout(() => window.open(`https://google.com/search?q=${encodeURIComponent(q)}`, '_blank'), 600); return `Buscando "${q}" en Google`; }
   }
 
-  // Calculadora
   if (t.includes('cuanto es') || t.includes('calcula') || t.includes('resultado de') || t.includes('cuanto da')) {
     try {
       let expr = t
@@ -1235,7 +1266,6 @@ function handleLocal(text) {
     } catch(e) {}
   }
 
-  // Random
   if (t.includes('numero aleatorio') || t.includes('numero al azar') || t.includes('dime un numero')) {
     const nums = t.match(/\d+/g);
     if (nums && nums.length >= 2) {
@@ -1245,16 +1275,15 @@ function handleLocal(text) {
     return `El número es ${Math.floor(Math.random() * 100) + 1}`;
   }
 
-  // Moneda
   if (t.includes('cara') || t.includes('sello')) {
     return `Salió... ${Math.random() > 0.5 ? 'cara' : 'sello'}!`;
   }
 
-  return null; // pasar a IA
+  return null;
 }
 
 // ===========================
-// TTS (síntesis de voz)
+// TTS
 // ===========================
 function speak(text) {
   if (!('speechSynthesis' in window)) {
@@ -1264,21 +1293,17 @@ function speak(text) {
   }
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
-
   const voices = window.speechSynthesis.getVoices();
   const esVoice = voices.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('female'))
     || voices.find(v => v.lang.startsWith('es'))
     || voices[0];
-
   if (esVoice) utt.voice = esVoice;
   utt.lang = 'es-MX';
   utt.rate = 1.0;
   utt.pitch = 1.0;
-
   utt.onstart = () => { isSpeaking = true; setOrbState('speaking'); };
   utt.onend = () => { isSpeaking = false; setOrbState('idle'); };
   utt.onerror = () => { isSpeaking = false; setOrbState('idle'); };
-
   window.speechSynthesis.speak(utt);
 }
 
@@ -1287,30 +1312,22 @@ function speak(text) {
 // ===========================
 async function processMessage(text) {
   if (!text.trim()) return;
-
   addMsg(text, 'user');
   setOrbState('thinking');
   showTyping();
-
-  // Intentar comando local primero
   const local = handleLocal(text);
   let reply;
-
   if (local) {
     reply = local;
   } else {
     reply = await askGroq(text);
   }
-
   hideTyping();
   addMsg(reply, 'jarvis');
   setOrbState('speaking');
   speak(reply);
 }
 
-// ===========================
-// INPUT DE TEXTO
-// ===========================
 function sendText() {
   const input = document.getElementById('msg-input');
   const text = input.value.trim();
@@ -1324,43 +1341,34 @@ function quickCmd(text) {
 }
 
 // ===========================
-// VOZ (Web Speech API)
+// VOZ
 // ===========================
 function setupRecognition() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     document.getElementById('mic-btn').style.opacity = '0.3';
-    document.getElementById('mic-btn').title = 'Voz no soportada en este navegador';
-    toast('Voz no disponible en este navegador. Usa Chrome.');
+    toast('Voz no disponible. Usa Chrome.');
     return;
   }
-
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'es-ES';
   recognition.continuous = false;
   recognition.interimResults = false;
-
   recognition.onresult = (e) => {
     const text = e.results[0][0].transcript;
     stopListening();
     processMessage(text);
   };
-
   recognition.onerror = (e) => {
-    console.error('Speech error:', e.error);
     stopListening();
     if (e.error !== 'no-speech') toast('Error de micrófono: ' + e.error);
   };
-
   recognition.onend = () => { if (isListening) stopListening(); };
 }
 
 function toggleListen() {
-  if (isListening) {
-    stopListening();
-  } else {
-    startListening();
-  }
+  if (isListening) stopListening();
+  else startListening();
 }
 
 function startListening() {
@@ -1397,15 +1405,13 @@ function saveConfig() {
   config.groqKey = document.getElementById('cfg-key').value.trim();
   config.model = document.getElementById('cfg-model').value;
   config.userName = document.getElementById('cfg-name').value.trim() || 'Axel';
-
   localStorage.setItem('jarvis_key', config.groqKey);
   localStorage.setItem('jarvis_model', config.model);
   localStorage.setItem('jarvis_name', config.userName);
-
   document.getElementById('model-label').textContent = config.model.includes('70b') ? 'LLAMA-70B' : config.model.split('-')[0].toUpperCase();
   document.getElementById('model-display').textContent = config.model;
-
   closeConfig();
+  updateKeyBadge();
   toast('Configuración guardada');
 }
 
@@ -1426,14 +1432,13 @@ function toast(msg) {
 // ===========================
 window.onload = () => {
   setupRecognition();
+  updateKeyBadge();
 
-  // Preload voices
   if ('speechSynthesis' in window) {
     window.speechSynthesis.getVoices();
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
   }
 
-  // Mensaje de bienvenida
   setTimeout(() => {
     const greetings = [
       `Hola ${config.userName}, sistema activo. ¿Qué necesitas?`,
@@ -1445,9 +1450,10 @@ window.onload = () => {
     speak(msg);
   }, 500);
 
-  // Primer aviso si no hay key
   if (!config.groqKey) {
-    setTimeout(() => toast('Configura tu Groq API key en ⚙ CONFIG'), 1500);
+    setTimeout(() => toast('Crea un config.js con tu key o ponla en ⚙ CONFIG'), 1500);
+  } else if (KEY_SOURCE === 'config.js') {
+    setTimeout(() => toast('✓ Key cargada automáticamente desde config.js'), 1500);
   }
 };
 </script>
